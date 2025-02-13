@@ -54,10 +54,6 @@ export interface UserChatData {
 export interface ChatConfig {
   TEMPERATURE: number;
   MAX_TOKENS: number;
-  TOKENIZER: {
-    URL: string;
-    KEY: string;
-  };
   PROVIDERS: ChatProviderConfig[];
   COST_FACTOR: number | 1000;
 }

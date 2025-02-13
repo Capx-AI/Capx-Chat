@@ -6,22 +6,24 @@
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Supabase Setup](#supabase-setup)
-  - [Installation](#installation)
-  - [Running with Docker](#running-with-docker)
-- [API Endpoints](#api-endpoints)
-  - [Authentication](#authentication)
-  - [Chat Operations](#chat-operations)
-- [Project Structure](#project-structure)
-- [Additional Information](#additional-information)
-  - [Error Handling](#error-handling)
-  - [Testing](#testing)
-  - [Contributing](#contributing)
-- [License](#license)
+- [Capx‑Chat](#capxchat)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Supabase Setup](#supabase-setup)
+    - [Installation](#installation)
+    - [Running with Docker](#running-with-docker)
+  - [API Endpoints](#api-endpoints)
+    - [Authentication](#authentication)
+    - [Chat Operations](#chat-operations)
+  - [Project Structure](#project-structure)
+  - [Additional Information](#additional-information)
+    - [Error Handling](#error-handling)
+    - [Testing](#testing)
+    - [Contributing](#contributing)
+  - [License](#license)
 
 ---
 
@@ -72,24 +74,31 @@ Capx‑Chat is designed to offer a seamless chatting experience. The application
    - Update values such as `SUPABASE_URL` and `SUPABASE_KEY`.
 
 ### Installation
-
 1. **Install Dependencies**
 
-   ```bash
-   npm install
-   ```
+  ```bash
+  npm install
+  ```
 
-2. **Build the Project**
+2. **Start the Server (Development Mode)**
 
-   ```bash
-   npm run build
-   ```
+  ```bash
+  npm run dev
+  ```
 
-3. **Start the Server (Development Mode)**
+3. **Build the Project**
 
-   ```bash
-   npm start
-   ```
+  ```bash
+  npm run build
+  ```
+
+
+
+4. **Start the Server (Production Mode - from built files)**
+
+  ```bash
+  npm start
+  ```
 
 ### Running with Docker
 
@@ -123,13 +132,145 @@ docker run -p 3000:3000 capx-chat
       }'
   ```
 
+  **Response Schema:**
+
+  ```json
+  {
+    "user": {
+      "id": "1f272808-8733-4008-8f53-671e338e3fbc",
+      "email": "user@example.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "username": "johndoe"
+    },
+    "session": {
+      "access_token": "<your-jwt-token>",
+      "refresh_token": "<your-jwt-refresh-token>",
+      "token_type": "bearer"
+    }
+  }
+  ```
+
 - **Get Current User**  
   **Endpoint:** `GET /app/users/`  
   **Description:** Retrieves the current user’s data (requires a valid session token).
 
-### Chat Operations
+  **Example:**
 
-- **Create Chat**  
+  ```bash
+  curl --location 'http://localhost:3000/app/users/' \
+  --header 'Authorization: Bearer <your-jwt-token>'
+  ```
+
+  **Response Schema:**
+
+  ```json
+  {
+      "user": {
+          "id": "1f272808-8733-4008-8f53-671e338e3fbc",
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "username": "johndoe"
+      }
+  }
+  ```
+
+### Chat Operations
+- **Get Chat Overview**  
+  **Endpoint:** `GET /app/chat/overview`  
+  **Description:** Retrieves an overview of all chat sessions associated with the current user, including segmented chat history, available providers with their models, and the user's current credit balance.
+
+  **Example:**
+
+  ```bash
+  curl --location 'http://localhost:3000/app/chat/overview' \
+       --header 'Authorization: Bearer <your-jwt-token>'
+  ```
+
+  **Response Schema:**
+
+  ```json
+  {
+    "result": {
+        "success": true,
+        "message": "User overview data retrieved successfully",
+        "chat_history": {
+            "today_chats": [
+                {
+                    "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b",
+                    "title": "What is 2+4",
+                    "model": "gpt-4o",
+                    "provider": "OpenAI",
+                    "updated_at": "2025-02-13T17:54:00.66136+00:00",
+                    "model_name": "GPT 4o"
+                }
+            ],
+            "previous_day_chats": [],
+            "other_chats": []
+        },
+        "user_credits": 999.167875,
+        "providers": [
+            {
+                "name": "Capx",
+                "icon": "Capx",
+                "models": [
+                    {
+                        "name": "Gemini 1.5 Flash",
+                        "model": "gemini-1.5-flash",
+                        "min_credits": 4,
+                        "provider": "capx"
+                    }
+                ]
+            },
+            {
+                "name": "OpenAI",
+                "icon": "ChatGpt",
+                "models": [
+                    {
+                        "name": "GPT 4o Mini",
+                        "model": "gpt-4o-mini",
+                        "min_credits": 8,
+                        "provider": "openai"
+                    },
+                    {
+                        "name": "GPT 4o",
+                        "model": "gpt-4o",
+                        "min_credits": 125,
+                        "provider": "openai"
+                    }
+                ]
+            },
+            {
+                "name": "Anthropic",
+                "icon": "Claude",
+                "models": [
+                    {
+                        "name": "Claude 3.5 Sonnet",
+                        "model": "claude-3-5-sonnet-20240620",
+                        "min_credits": 180,
+                        "provider": "anthropic"
+                    }
+                ]
+            },
+            {
+                "name": "Meta",
+                "icon": "Meta",
+                "models": [
+                    {
+                        "name": "Llama 3.1 8b",
+                        "model": "meta-llama/Meta-Llama-3-8B-Instruct-Turbo",
+                        "min_credits": 4,
+                        "provider": "meta"
+                    }
+                ]
+            }
+        ]
+    }
+  }
+  ```
+
+  - **Create Chat**  
   **Endpoint:** `POST /app/chat/`  
   **Description:** Initializes a new chat session.  
   **Example:**
@@ -137,7 +278,7 @@ docker run -p 3000:3000 capx-chat
   ```bash
   curl --location 'http://localhost:3000/app/chat/' \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer your-jwt-token' \
+  --header 'Authorization: Bearer <your-jwt-token>' \
   --data '{
       "data": {
           "model": "gpt-4o",
@@ -148,13 +289,179 @@ docker run -p 3000:3000 capx-chat
   }'
   ```
 
+  **Response Schema:**
+
+  ```json
+  {
+    "result": {
+      "success": true,
+      "message": "Success",
+      "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b",
+      "conversation_id": "45e7a957-5a47-46bf-b8e3-49a761fd8f28",
+      "generated_text": "2 + 4 equals 6.",
+      "credits_utilised": 0.128625,
+      "provider": "OpenAI",
+      "model": "gpt-4o",
+      "title": "What is 2+4"
+    }
+  }
+  ```
+
+- **Continue Chat**  
+    **Endpoint:** `POST /app/chat/`  
+    **Description:** Continues an existing chat session by including a previously generated `chat_id`.  
+    **Example:**
+
+    ```bash
+    curl --location 'http://localhost:3000/app/chat/' \
+      --header 'Content-Type: application/json' \
+      --header 'Authorization: Bearer <your-jwt-token>' \
+      --data '{
+          "data": {
+              "model": "gpt-4o",
+              "provider": "OpenAI",
+              "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b", // <chat_id from create chat>
+              "text": "continue the conversation"
+          }
+      }'
+    ```
+
+    **Response Schema:**
+
+    ```json
+    {
+      "result": {
+        "success": true,
+        "message": "Success",
+        "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b",
+        "conversation_id": "cf9c88fa-cda8-40ab-8602-5fd60500fbdd",
+        "generated_text": "9 + 5 equals 14.", 
+        "credits_utilised": 0.189,
+        "provider": "OpenAI",
+        "model": "gpt-4o",
+        "title": "What is 2+4"
+      }
+    }
+    ```
+- **Retrieve Chat History**  
+    **Endpoint:** `GET /app/chat`  
+    **Description:** Retrieves the full chat history for a specific chat session. The endpoint requires a `chat_id` query parameter and accepts an optional `timestamp` query parameter. When provided, the timestamp filters records to those created before that time (using the value from `next_timestamp`).
+
+    **Example:**
+    ```bash
+    curl --location "http://localhost:3000/app/chat?chat_id=f5ddc591-78a1-4640-b90b-220748d547c0" \
+    --header "Authorization: Bearer <your-jwt-token>"
+    ```
+
+    **Optional Timestamp:**
+    ```bash
+    curl --location "http://localhost:3000/app/chat?timestamp=2024-10-07T18%3A03%3A53.836392%2B00%3A00&chat_id=f5ddc591-78a1-4640-b90b-220748d547c0" \
+    --header "Authorization: Bearer <your-jwt-token>"
+    ```
+
+    **Response Schema:**
+    ```json
+    {
+      "result": {
+        "success": true,
+        "message": "Successfully retrieved chat history",
+        "chat_id": "f5ddc591-78a1-4640-b90b-220748d547c0",
+        "provider": "OpenAI",
+        "model": "gpt-4o",
+        "previous_history": [
+          {
+            "conversation_id": "56ce2c15-91a0-4d00-a2be-68d9c0bd6d91",
+            "conversation_created_at": "2025-02-13T17:54:00.66136+00:00",
+            "model": "gpt-4o",
+            "provider": "OpenAI",
+            "message_data": {
+              "user": {
+                "chat_id": "f5ddc591-78a1-4640-b90b-220748d547c0",
+                "message": "What is 10+4",
+                "created_at": "2025-02-13T17:54:00.66136+00:00",
+                "message_id": "21cc1ed0-9f32-42c7-a1a2-4344f1aeb728",
+                "sender_role": "user"
+              },
+              "assistant": {
+                "chat_id": "f5ddc591-78a1-4640-b90b-220748d547c0",
+                "message": "10 + 4 equals 14.",
+                "created_at": "2025-02-13T17:54:00.66136+00:00",
+                "message_id": "d904f9e2-84bd-4adb-872f-2ee5c59afb3c",
+                "sender_role": "assistant"
+              }
+            }
+          }
+        ],
+        "next_timestamp": null
+      }
+    }
+    ```
+
 - **Delete Chat**  
   **Endpoint:** `POST /app/chat/delete`  
   **Description:** Deletes an existing chat session (authorization required).
 
+  **Example:**
+
+  ```bash
+  curl --location 'http://localhost:3000/app/chat/delete' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer <your-jwt-token>' \
+  --data '{
+      "data": {
+          "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b"
+      }
+  }'
+  ```
+
+  **Response Schema:**
+
+  ```json
+  {
+    "result": {
+      "success": true,
+      "message": "Chat successfully deleted.",
+      "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b"
+    }
+  }
+  ```
+
 - **Edit Chat Prompt**  
   **Endpoint:** `POST /app/chat/editPrompt`  
   **Description:** Updates the prompt text of an ongoing chat session.
+
+  **Example:**
+
+  ```bash
+  curl --location 'http://localhost:3000/app/chat/editPrompt' \
+      --header 'Content-Type: application/json' \
+      --header 'Authorization: Bearer <your-jwt-token>' \
+      --data '{
+          "data": {
+              "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b",
+              "text": "Remember the number 10.",
+              "conversation_id": "cf9c88fa-cda8-40ab-8602-5fd60500fbdd"
+          }
+      }'
+  ```
+
+  **Response Schema:**
+
+  ```json
+  {
+    "result": {
+      "success": true,
+      "message": "Success",
+      "chat_id": "3a27e504-fbb1-45a7-ba79-81683442fa4b",
+      "generated_text": "Got it, I'll remember the number 10 for our conversation. Let me know if there's anything specific you'd like to do with it!",
+      "credits_utilised": 0.385875,
+      "provider": "OpenAI",
+      "model": "gpt-4o",
+      "new_conversation_id": "f659f484-79aa-44f7-9458-ca8fc841534e",
+      "edited_conversation_id": "cf9c88fa-cda8-40ab-8602-5fd60500fbdd"
+    }
+  }
+  ```
 
 ---
 
